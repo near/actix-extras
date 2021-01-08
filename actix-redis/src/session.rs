@@ -104,14 +104,12 @@ impl RedisSession {
     }
 }
 
-impl<S, B> Transform<S> for RedisSession
+impl<S, B> Transform<S, ServiceRequest> for RedisSession
 where
-    S: Service<Request = ServiceRequest, Response = ServiceResponse<B>, Error = Error>
-        + 'static,
+    S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = Error> + 'static,
     S::Future: 'static,
     B: 'static,
 {
-    type Request = ServiceRequest;
     type Response = ServiceResponse<B>;
     type Error = S::Error;
     type InitError = ();
@@ -132,14 +130,12 @@ pub struct RedisSessionMiddleware<S: 'static> {
     inner: Rc<Inner>,
 }
 
-impl<S, B> Service for RedisSessionMiddleware<S>
+impl<S, B> Service<ServiceRequest> for RedisSessionMiddleware<S>
 where
-    S: Service<Request = ServiceRequest, Response = ServiceResponse<B>, Error = Error>
-        + 'static,
+    S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = Error> + 'static,
     S::Future: 'static,
     B: 'static,
 {
-    type Request = ServiceRequest;
     type Response = ServiceResponse<B>;
     type Error = Error;
     #[allow(clippy::type_complexity)]
@@ -285,6 +281,7 @@ impl Inner {
         } else {
             let value: String = iter::repeat(())
                 .map(|()| OsRng.sample(Alphanumeric))
+                .map(char::from)
                 .take(32)
                 .collect();
 
