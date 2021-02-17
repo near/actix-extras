@@ -2,6 +2,7 @@
 
 ## Unreleased - 2020-xx-xx
 * Correct error handling when extracting auth details from request. [#128]
+* Minimum supported Rust version (MSRV) is now 1.46.0.
 
 [#128]: https://github.com/actix/actix-web-httpauth/pull/128
 

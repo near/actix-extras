@@ -3,6 +3,7 @@
 ## Unreleased - 2020-xx-xx
 * `Session::set_session` takes a `IntoIterator` instead of `Iterator`
 * Fix calls to `session.purge()` from paths other than the one specified in the cookie
+* Minimum supported Rust version (MSRV) is now 1.46.0.
 
 
 ## 0.4.0 - 2020-09-11
