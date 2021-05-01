@@ -4,10 +4,11 @@ use futures_util::future::{ready, Ready};
 use serde::{Deserialize, Serialize};
 use time::Duration;
 
+use actix_cookie::Cookied;
 use actix_web::{
     cookie::{Cookie, CookieJar, Key, SameSite},
     dev::{ServiceRequest, ServiceResponse},
-    error::{Error, Result},
+    error::{Error, JsonPayloadError, Result},
     http::header::{self, HeaderValue},
     HttpMessage,
 };
@@ -71,7 +72,7 @@ impl CookieIdentityInner {
         let add_cookie = value.is_some();
         let val = value.map(|val| {
             if !self.legacy_supported() {
-                serde_json::to_string(&val)
+                serde_json::to_string(&val).map_err(JsonPayloadError::Serialize)
             } else {
                 Ok(val.identity)
             }
@@ -108,10 +109,10 @@ impl CookieIdentityInner {
         };
 
         if add_cookie {
-            jar.private(&key).add(cookie);
+            jar.private_mut(&key).add(cookie);
         } else {
             jar.add_original(cookie.clone());
-            jar.private(&key).remove(cookie);
+            jar.private_mut(&key).remove(cookie);
         }
 
         for cookie in jar.delta() {
@@ -391,7 +392,7 @@ mod tests {
             .copied()
             .collect();
 
-        jar.private(&Key::derive_from(&key)).add(Cookie::new(
+        jar.private_mut(&Key::derive_from(&key)).add(Cookie::new(
             COOKIE_NAME,
             serde_json::to_string(&CookieValue {
                 identity: identity.to_string(),
@@ -575,7 +576,7 @@ mod tests {
 
     fn legacy_login_cookie(identity: &'static str) -> Cookie<'static> {
         let mut jar = CookieJar::new();
-        jar.private(&Key::derive_from(&COOKIE_KEY_MASTER))
+        jar.private_mut(&Key::derive_from(&COOKIE_KEY_MASTER))
             .add(Cookie::new(COOKIE_NAME, identity));
         jar.get(COOKIE_NAME).unwrap().clone()
     }
