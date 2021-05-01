@@ -2,11 +2,12 @@
 
 use std::{collections::HashMap, rc::Rc};
 
+use actix_cookie::Cookied;
 use actix_service::{Service, Transform};
 use actix_web::cookie::{Cookie, CookieJar, Key, SameSite};
 use actix_web::dev::{ServiceRequest, ServiceResponse};
 use actix_web::http::{header::SET_COOKIE, HeaderValue};
-use actix_web::{Error, HttpMessage, ResponseError};
+use actix_web::{Error, ResponseError};
 use derive_more::Display;
 use futures_util::future::{ok, LocalBoxFuture, Ready};
 use serde_json::error::Error as JsonError;
@@ -106,8 +107,8 @@ impl CookieSessionInner {
         let mut jar = CookieJar::new();
 
         match self.security {
-            CookieSecurity::Signed => jar.signed(&self.key).add(cookie),
-            CookieSecurity::Private => jar.private(&self.key).add(cookie),
+            CookieSecurity::Signed => jar.signed_mut(&self.key).add(cookie),
+            CookieSecurity::Private => jar.private_mut(&self.key).add(cookie),
         }
 
         for cookie in jar.delta() {
