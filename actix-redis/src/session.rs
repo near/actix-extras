@@ -380,9 +380,10 @@ mod test {
     use super::*;
     use actix_session::Session;
     use actix_web::{
+        body::Body,
         middleware, web,
         web::{get, post, resource},
-        App, HttpResponse, Result,
+        App, BaseHttpResponse, HttpResponse, Result,
     };
     use serde::{Deserialize, Serialize};
     use serde_json::json;
@@ -438,7 +439,7 @@ mod test {
         }))
     }
 
-    async fn logout(session: Session) -> Result<HttpResponse> {
+    async fn logout(session: Session) -> Result<BaseHttpResponse<Body>> {
         let id: Option<String> = session.get("user_id")?;
         if let Some(x) = id {
             session.purge();
@@ -646,7 +647,11 @@ mod test {
             .unwrap();
         assert_ne!(
             OffsetDateTime::now_utc().year(),
-            cookie_4.expires().map(|t| t.year()).unwrap()
+            cookie_4
+                .expires()
+                .and_then(|t| t.datetime())
+                .map(|t| t.year())
+                .unwrap()
         );
 
         // Step 10: GET index, including session cookie #2 in request

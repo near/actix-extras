@@ -534,7 +534,9 @@ mod tests {
             .find(|c| c.name() == "actix-session")
             .expect("Cookie is set")
             .expires()
-            .expect("Expiration is set");
+            .expect("Expiration is set")
+            .datetime()
+            .expect("Expiration is a DateTime");
 
         actix_rt::time::sleep(std::time::Duration::from_secs(1)).await;
 
@@ -546,7 +548,9 @@ mod tests {
             .find(|c| c.name() == "actix-session")
             .expect("Cookie is set")
             .expires()
-            .expect("Expiration is set");
+            .expect("Expiration is set")
+            .datetime()
+            .expect("Expiration is a DateTime");
 
         assert!(expires_2 - expires_1 >= Duration::seconds(1));
     }
