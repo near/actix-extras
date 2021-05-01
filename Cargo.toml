@@ -1,6 +1,7 @@
 [workspace]
 members = [
   "actix-cors",
+  "actix-cookie",
   "actix-identity",
   "actix-protobuf",
   "actix-protobuf/examples/prost-example",
